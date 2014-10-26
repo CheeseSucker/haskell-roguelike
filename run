@@ -1,0 +1,39 @@
+#!/bin/bash
+
+FINDCMD='find -type d -printf "%p "'
+LTIMECMD="stat -c %Z \`$FINDCMD\` | sort -nr | head -n 1"
+
+
+# Set environment variables (console size)
+
+eval $(resize)
+
+# Build haskell program
+ghc roguelike.hs
+
+# Run game if build was successful
+if [ $? -eq 0 ]; then
+	LTIME=$(eval $LTIMECMD)
+	echo "Running game ..."
+    ./roguelike
+else
+	LTIME=$(eval $LTIMECMD)
+fi
+
+# Display message to user
+echo ""
+echo "----------------------------"
+echo "Waiting for file changes ..."
+echo "----------------------------"
+echo ""
+
+# Loop until file has changed
+ATIME=$(eval $LTIMECMD)
+while [[ "$LTIME" == "$ATIME" ]]; do
+	sleep 1s
+	LTIME=$(eval $LTIMECMD)
+done
+
+# Rerun this script, potentially with changes.
+$0
+
