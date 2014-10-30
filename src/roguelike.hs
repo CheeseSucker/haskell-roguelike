@@ -1,22 +1,22 @@
 module Main where
 
-import           Control.Concurrent
-import           Control.Monad
-import           Data.Char
-import           Data.IORef
-import           Data.Maybe
-import           Map
-import           Monster
-import           Move
-import           Player
-import           Position
-import           Ray
-import           State
-import           System.IO
-import           System.IO.Unsafe
-import           TerminalStuff
-import           Vision
-import           Vision.DDA
+import Position
+import Data.IORef
+import Data.Char
+import Control.Concurrent
+import Control.Monad
+import TerminalStuff
+import Map
+import Move
+import Monster
+import Player
+import State
+import Ray
+import Data.Maybe
+import System.IO
+import System.IO.Unsafe
+import Vision
+import Vision.DDA
 -- import UI.NCurses
 
 -- TODO: Use proper state. IORef is frowned upon!
@@ -119,6 +119,15 @@ draw m pos = do
 
 keyPressed :: Char -> IO ()
 keyPressed 'q' = writeIORef shouldQuit True
+keyPressed '1' = moveRel (-1, 1)
+keyPressed '2' = moveRel (0, 1)
+keyPressed '3' = moveRel (1, 1)
+keyPressed '4' = moveRel (-1, 0)
+keyPressed '5' = moveRel (0, 0)
+keyPressed '6' = moveRel (1, 0)
+keyPressed '7' = moveRel (-1, -1)
+keyPressed '8' = moveRel (0, -1)
+keyPressed '9' = moveRel (1, -1)
 keyPressed _ = return()
 
 main :: IO ()
@@ -151,13 +160,7 @@ playGame map = do
     let coloredMap = colorMap $ computeVisible map pos
     draw coloredMap pos
 
-    setCursor 3 3
-    putStr "X"
-
-    --let trace = dda map $ Ray (fromIntegral (fst pos), fromIntegral (snd pos)) (2.0, 2.0)
-    --showTrace trace
-    --setCursor 0 10
-    --print trace
+    hFlush stdout
 
     a <- getHiddenChar
     cls
@@ -207,6 +210,7 @@ winSpecialKeyPressed 'H' = specialKeyPressed 'A'
 winSpecialKeyPressed 'P' = specialKeyPressed 'B'
 winSpecialKeyPressed 'M' = specialKeyPressed 'C'
 winSpecialKeyPressed 'K' = specialKeyPressed 'D'
+winSpecialKeyPressed x = specialKeyPressed x
 
 
 specialKeyPressed :: Char -> IO ()
@@ -214,3 +218,4 @@ specialKeyPressed 'A' = moveRel (0, -1)
 specialKeyPressed 'B' = moveRel (0, 1)
 specialKeyPressed 'C' = moveRel (1, 0)
 specialKeyPressed 'D' = moveRel (-1, 0)
+specialKeyPressed x = print x
