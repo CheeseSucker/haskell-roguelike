@@ -1,10 +1,10 @@
 module TerminalStuff where
 
-import System.IO
-import System.Environment
+import           System.Environment
+import           System.IO
 
 consoleWidth :: IO Int
-consoleWidth = do 
+consoleWidth = do
     e <- getEnv("COLUMNS")
     return $ read e
 
@@ -20,10 +20,10 @@ cls = do
     setCursor 0 0 -- Set cursor to (0, 0) for compatibility with DOS
 
 setCursor :: Int -> Int -> IO ()
-setCursor x y = runAnsi $ (show y) ++ ";" ++ (show x) ++ "H"
+setCursor x y = runAnsi $ (show y) ++ ";" ++ (show x) ++ "H"
 
 setCursorX :: Int -> IO ()
-setCursorX x = runAnsi $ (show x) ++ "G" 
+setCursorX x = runAnsi $ (show x) ++ "G"
 
 runAnsi :: String -> IO ()
 runAnsi cmd = putStr $ "\x1b[" ++ cmd
@@ -93,4 +93,4 @@ Position the Cursor:
   \033[2J
 - Erase to end of line:
   \033[K
--} 
+-}

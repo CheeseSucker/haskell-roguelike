@@ -1,0 +1,5 @@
+{
+    "cmd": "c:\\windows\\system32\\cmd.exe",
+    "args": ["/c", "run.bat", "new-window"],
+    "sh": false
+}

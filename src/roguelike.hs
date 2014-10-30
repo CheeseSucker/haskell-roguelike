@@ -19,8 +19,17 @@ import Vision
 import Vision.DDA
 -- import UI.NCurses
 
+----- HACK TO MAKE SETBUFFERING WORK ON WINDOWS! ----
+{-# LANGUAGE ForeignFunctionInterface #-}
+import Data.Char
+import Foreign.C.Types
+getHiddenChar = fmap (chr.fromEnum) c_getch
+foreign import ccall unsafe "conio.h getch"
+  c_getch :: IO CInt
+---------- END HACK ---------------------
+
 -- TODO: Use proper state. This is frowned upon!
-shouldQuit :: IORef Bool 
+shouldQuit :: IORef Bool
 {-# NOINLINE shouldQuit #-}
 shouldQuit = unsafePerformIO (newIORef False)
 
@@ -32,14 +41,14 @@ drawPlayer :: Position -> IO ()
 drawPlayer (x, y) = do
     setCursor (x+1) (y+1)
     putStr $ colorChr '@'
-    putStr clrReset 
+    putStr clrReset
 
 drawMonsters :: [Monster] -> IO ()
 drawMonsters [] = return ()
 drawMonsters (m:ms) = do
     drawMonster m
     drawMonsters ms
-    
+
 drawMonster :: Monster -> IO ()
 drawMonster m = do
     map <- readIORef State.map
@@ -60,7 +69,7 @@ printStat :: Show a => Position -> String -> a -> IO ()
 printStat (x, y) title var = do
     setCursor x y
     putStr $ title ++ ": "
-    putStr $ show var 
+    putStr $ show var
 
 drawHud :: Position -> IO ()
 drawHud pos = do
@@ -68,7 +77,7 @@ drawHud pos = do
     let top = h - 1
     setCursor 0 top
     printSeparator
-    
+
     p <- readIORef State.player
     printStat (0, top + 1) "Pos" $ position p
     printStat (20, top + 1) "HP" $ health p
@@ -88,7 +97,7 @@ drawLog = do
     let space = [' ' | x <- [0..bw]]
     let line = ['=' | x <- [0..bw]]
     setCursor (left - 1) (top - 1)
-    printIndentedLn (left - 2) $ "=" ++ line 
+    printIndentedLn (left - 2) $ "=" ++ line
     printIndentedLn (left - 2) $ "|" ++ space
     printIndentedLn (left - 2) $ "|" ++ space
     printIndentedLn (left - 2) $ "|" ++ space
@@ -141,29 +150,33 @@ showTrace (p:ps) = do
     setCursor (x+1) (y+1)
     putStr "#"
     showTrace ps
-    
+
 
 playGame map = do
     handleAI
 
     p <- readIORef player
     let pos = Player.position p
-    let coloredMap = colorMap $ computeVisible map pos 
+    let coloredMap = colorMap $ computeVisible map pos
     draw coloredMap pos
 
     setCursor 3 3
     putStr "X"
-    
+
     --let trace = dda map $ Ray (fromIntegral (fst pos), fromIntegral (snd pos)) (2.0, 2.0)
     --showTrace trace
     --setCursor 0 10
-    --print trace 
- 
-    a <- getChar
+    --print trace
+
+    a <- getHiddenChar
     cls
     setCursor 0 45
     if ord a == 0x1B then do
         handleControlSequence
+    else if a == '\224' then do
+        -- Windows is special ...
+        a <- getHiddenChar
+        winSpecialKeyPressed a
     else do
         keyPressed a
     sq <- readIORef shouldQuit
@@ -176,7 +189,7 @@ handleAI = do
     ms <- readIORef monsters
     map <- readIORef State.map
     let newMonsters = doMonsterStuff ms map p
-    writeIORef monsters newMonsters 
+    writeIORef monsters newMonsters
     return ()
 
 doMonsterStuff :: [Monster] -> GameMap -> Player -> [Monster]
@@ -185,22 +198,28 @@ doMonsterStuff (m:ms) map p = [handleMonster m map p] ++ (doMonsterStuff ms map 
 
 handleControlSequence :: IO ()
 handleControlSequence = do
-    a <- getChar
+    a <- getHiddenChar
     _hcs1 a
 
-_hcs1 :: Char -> IO () 
+_hcs1 :: Char -> IO ()
 _hcs1 ('[') = do
-    b <- getChar
-    specialKeyPressed b 
+    b <- getHiddenChar
+    specialKeyPressed b
 
 _hcs1 a = do
     putStrLn "Not proper sequence. Expected '[', got "
-    print a 
+    print a
     return ()
+
+winSpecialKeyPressed :: Char -> IO ()
+winSpecialKeyPressed 'H' = specialKeyPressed 'A'
+winSpecialKeyPressed 'P' = specialKeyPressed 'B'
+winSpecialKeyPressed 'M' = specialKeyPressed 'C'
+winSpecialKeyPressed 'K' = specialKeyPressed 'D'
+
 
 specialKeyPressed :: Char -> IO ()
 specialKeyPressed 'A' = moveRel (0, -1)
 specialKeyPressed 'B' = moveRel (0, 1)
 specialKeyPressed 'C' = moveRel (1, 0)
 specialKeyPressed 'D' = moveRel (-1, 0)
-

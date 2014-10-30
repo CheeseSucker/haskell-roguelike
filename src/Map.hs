@@ -54,10 +54,10 @@ colorStr (c:cs) = (colorChr c) ++ colorStr cs
 
 colorChr :: Char -> String 
 colorChr c 
-        | c == '=' = clrYellow ++ "▓" -- 2593
-        | c == '@' = clrGreen ++ "⚲" -- 26b2 
-        | c == '|' = clrYellow ++ "▓" -- 2593
-        | c == 'X' = clrRed ++ "\x1f42d" -- 🐭
+        | c == '=' = clrYellow ++ "=" -- 2593
+        | c == '@' = clrGreen ++ "@" -- 26b2 
+        | c == '|' = clrYellow ++ "|" -- 2593
+        | c == 'X' = clrRed ++ "X" -- 🐭
         | otherwise = clrWhite ++ [c]
 
 

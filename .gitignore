@@ -12,4 +12,7 @@ cabal.sandbox.config
 cabal.config
 
 # Project specific
+.dist-buildwrapper
+bin/
 roguelike
+*.exe

@@ -5,19 +5,28 @@ LTIMECMD="stat -c %Z \`$FINDCMD\` | sort -nr | head -n 1"
 
 
 # Set environment variables (console size)
-
-eval $(resize)
+if [ `command -v resize` ]; then
+	eval $(resize)
+else
+	export LINES=30
+	export COLUMNS=100
+fi
 
 # Build haskell program
-ghc roguelike.hs
+ghc -isrc -outputdir bin -o bin/roguelike src/roguelike.hs
 
 # Run game if build was successful
 if [ $? -eq 0 ]; then
 	LTIME=$(eval $LTIMECMD)
 	echo "Running game ..."
-    ./roguelike
+	bin/roguelike | cat
 else
 	LTIME=$(eval $LTIMECMD)
+fi
+
+if [ ! `command -v stat` ]; then
+	# Can not determine when files are changed
+	exit
 fi
 
 # Display message to user
@@ -36,4 +45,3 @@ done
 
 # Rerun this script, potentially with changes.
 $0
-
