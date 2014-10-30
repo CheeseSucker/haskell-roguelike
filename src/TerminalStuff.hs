@@ -2,6 +2,21 @@ module TerminalStuff where
 
 import           System.Environment
 import           System.IO
+import System.Info
+
+
+----- HACK TO MAKE SETBUFFERING WORK ON WINDOWS! ----
+{-# LANGUAGE ForeignFunctionInterface #-}
+import Data.Char
+import Foreign.C.Types
+foreign import ccall unsafe "conio.h getch"
+  c_getch :: IO CInt
+
+getHiddenChar :: IO Char
+getHiddenChar = case os of
+    "mingw32" -> fmap (chr.fromEnum) c_getch
+    otherwise -> getChar
+---------- END HACK ---------------------
 
 consoleWidth :: IO Int
 consoleWidth = do

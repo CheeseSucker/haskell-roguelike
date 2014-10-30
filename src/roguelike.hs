@@ -1,34 +1,25 @@
 module Main where
 
-import Position
-import Data.IORef
-import Data.Char
-import Control.Concurrent
-import Control.Monad
-import TerminalStuff
-import Map
-import Move
-import Monster
-import Player
-import State
-import Ray
-import Data.Maybe
-import System.IO
-import System.IO.Unsafe
-import Vision
-import Vision.DDA
+import           Control.Concurrent
+import           Control.Monad
+import           Data.Char
+import           Data.IORef
+import           Data.Maybe
+import           Map
+import           Monster
+import           Move
+import           Player
+import           Position
+import           Ray
+import           State
+import           System.IO
+import           System.IO.Unsafe
+import           TerminalStuff
+import           Vision
+import           Vision.DDA
 -- import UI.NCurses
 
------ HACK TO MAKE SETBUFFERING WORK ON WINDOWS! ----
-{-# LANGUAGE ForeignFunctionInterface #-}
-import Data.Char
-import Foreign.C.Types
-getHiddenChar = fmap (chr.fromEnum) c_getch
-foreign import ccall unsafe "conio.h getch"
-  c_getch :: IO CInt
----------- END HACK ---------------------
-
--- TODO: Use proper state. This is frowned upon!
+-- TODO: Use proper state. IORef is frowned upon!
 shouldQuit :: IORef Bool
 {-# NOINLINE shouldQuit #-}
 shouldQuit = unsafePerformIO (newIORef False)
